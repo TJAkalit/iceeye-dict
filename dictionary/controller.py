@@ -1,6 +1,14 @@
 from abc import ABC
-from staff.dbmodels import PhysicalMachine
-from staff.datamodels import PhysicalMachineInit, PhysicalMachineItem
+from staff.dbmodels import (
+    PhysicalMachine,
+    VirtualMachine,
+    Service,
+)
+from staff.datamodels import (
+    PhysicalMachineInit, PhysicalMachineItem,
+    VirtualMachineInit, VirtualMachineItem,
+    ServiceInit, ServiceItem,
+)
 from staff.db import Session
 from sqlalchemy import select, delete
 from pydantic import BaseModel
@@ -72,3 +80,13 @@ class PhysicalMachineController(Controller):
 
     dbModel = PhysicalMachine
     dataModel = PhysicalMachineItem
+
+class VirtualMachineController(Controller):
+
+    dbModel = VirtualMachine
+    dataModel = VirtualMachineItem
+
+class ServiceController(Controller):
+
+    dbModel = Service
+    dataModel = ServiceItem

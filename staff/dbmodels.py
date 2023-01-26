@@ -35,6 +35,7 @@ class VirtualMachine(Base):
     name = Column(String(512), nullable=False)
     cpu = Column(Integer)
     ram = Column(Integer)
+    pm_id = Column(ForeignKey(PhysicalMachine.id), nullable=True)
     
 class Service(Base):
     

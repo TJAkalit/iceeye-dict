@@ -131,3 +131,6 @@ dmypy.json
 env.sh
 key.crt
 start.sh
+
+migration.ps1
+start.ps1

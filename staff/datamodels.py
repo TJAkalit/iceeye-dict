@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class DomainItem(BaseModel):
     
@@ -34,6 +35,7 @@ class VirtualMachineItem(BaseModel):
     name: str
     cpu: int
     ram: int
+    pm_id: Optional[int]
     
     class Config:
         orm_mode = True
@@ -43,6 +45,7 @@ class VirtualMachineInit(BaseModel):
     name: str
     cpu: int
     ram: int
+    pm_id: Optional[int]
     
 class ServiceItem(BaseModel):
     
