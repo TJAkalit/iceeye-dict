@@ -26,6 +26,7 @@ class PhysicalMachine(Base):
     name = Column(String(512), nullable=False)
     cpu = Column(Integer)
     ram = Column(Integer)
+    cpu_multiply = Column(Integer, nullable=True)
 
 class VirtualMachine(Base):
     
@@ -36,6 +37,7 @@ class VirtualMachine(Base):
     cpu = Column(Integer)
     ram = Column(Integer)
     pm_id = Column(ForeignKey(PhysicalMachine.id), nullable=True)
+    size = Column(Integer)
     
 class Service(Base):
     
@@ -44,3 +46,14 @@ class Service(Base):
     name = Column(String(512), nullable=False)
     cpu = Column(Float)
     ram = Column(Float)
+    vm_id = Column(ForeignKey(VirtualMachine.id), nullable=True)
+    
+class Storage(Base):
+    
+    __tablename__ = 'storage'
+    id = Column(Integer, primary_key=True)
+    pm_id = Column(ForeignKey(PhysicalMachine.id))
+    name = Column(String(512), nullable=True)
+    type = Column(Integer, nullable=False)
+    size = Column(Integer)
+    

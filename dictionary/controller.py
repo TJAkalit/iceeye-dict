@@ -3,11 +3,13 @@ from staff.dbmodels import (
     PhysicalMachine,
     VirtualMachine,
     Service,
+    Storage,
 )
 from staff.datamodels import (
     PhysicalMachineInit, PhysicalMachineItem,
     VirtualMachineInit, VirtualMachineItem,
     ServiceInit, ServiceItem,
+    StorageInit, StorageItem,
 )
 from staff.db import Session
 from sqlalchemy import select, delete
@@ -47,7 +49,7 @@ class Controller(AbstractController):
     
     async def get(self, objId: int):
         
-        query = select(self.dbModel).where(self.dbModel.id==objId)
+        query = select(self.dbModel).where(self.dbModel.id==objId).order_by(self.dbModel.id)
         result = await self.s0.execute(query)
         data = [
             self.dataModel.from_orm(x[0]) for x in result.fetchall()
@@ -70,7 +72,6 @@ class Controller(AbstractController):
         
         query = delete(self.dbModel).where(self.dbModel.id==objId)
         result = await self.s0.execute(query)
-        print(result.rowcount)
         if result.rowcount ==0:
             raise HTTPException(404)
         await self.s0.commit()
@@ -90,3 +91,8 @@ class ServiceController(Controller):
 
     dbModel = Service
     dataModel = ServiceItem
+    
+class StorageControler(Controller):
+    
+    dbModel = Storage
+    dataModel = StorageItem

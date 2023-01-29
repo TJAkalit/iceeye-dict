@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, select, func
 
 from staff.db import Session
-from staff.datamodels import VirtualMachineInit
-from staff.dbmodels import VirtualMachine
+from staff.datamodels import VirtualMachineInit, Load, VirtualMachineItem
+from staff.dbmodels import VirtualMachine, Service, PhysicalMachine
 
 from .controller import VirtualMachineController
 
@@ -12,12 +12,24 @@ virtMachine = APIRouter()
 TAG = ('Virtual machine',)
 
 @virtMachine.get('/', tags=TAG)
-async def getAllMethod():
+async def getAllMethod(name: str = None, host_name: str = None):
     
     async with Session() as s0:
         
-        controller = VirtualMachineController(s0)
-        return await controller.all()
+        query = select(VirtualMachine).order_by(VirtualMachine.id)
+        if name:
+            query = query.filter(
+                VirtualMachine.name.like(name + '%')
+            )
+        if host_name:
+            query = query.filter(
+                PhysicalMachine.id==VirtualMachine.pm_id,
+                PhysicalMachine.name.like(host_name + '%')
+            )
+            
+        result = await s0.execute(query)
+        dataset = [VirtualMachineItem.from_orm(x[0]) for x in result.fetchall()]
+        return dataset
     
 @virtMachine.get('/{machine_id}', tags=TAG)
 async def getMethod(machine_id: int):
@@ -67,3 +79,30 @@ async def deleteMethod(machine_id: int):
         controller = VirtualMachineController(s0)
         await controller.delete(machine_id)
         return {"Result": "Delete"} 
+
+@virtMachine.get('/{machine_id}/load', tags=TAG)
+async def getLoad(machine_id: int):
+    
+    async with Session() as s0:
+        
+        query = select(VirtualMachine).where(VirtualMachine.id==machine_id)
+        
+        result = await s0.execute(query)
+        dataset = [x for x in result.fetchall()]
+        
+        if dataset.__len__()==0:
+            raise HTTPException(404)
+        
+        query = select(
+            func.sum(Service.cpu).label('cpu'), 
+            func.sum(Service.ram).label('ram')
+            ).select_from(
+                VirtualMachine
+            ).where(
+                VirtualMachine.id==machine_id, 
+                Service.vm_id==VirtualMachine.id
+            )
+        result = await s0.execute(query)
+        dataset = [Load.from_orm(x) for x in result.fetchall()]
+        
+        return dataset[0]
